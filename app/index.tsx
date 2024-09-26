@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet } from "react-native";
+
+import LottieView from "lottie-react-native";
 import * as Location from "expo-location";
 import tw from "../tw-rn";
 
@@ -91,6 +93,12 @@ export default function WeatherApp() {
 
   return (
     <View style={tw`flex flex-col justify-center items-center p-20`}>
+      <LottieView
+        source={require("../assets/images/Animation - 1727366943110.json")}
+        autoPlay
+        loop
+        style={{ width: 200, height: 200 }}
+      />
       {geoError ? (
         <Text>{geoError}</Text>
       ) : (
