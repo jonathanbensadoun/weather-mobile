@@ -1,14 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import * as Location from "expo-location";
+import tw from "../tw-rn";
+
+interface Cityname {
+  city: string;
+  town: string;
+  village: string;
+}
+interface DataDay {
+  current: {
+    temperature_2m: number;
+  };
+}
 
 export default function WeatherApp() {
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
-  const [cityName, setCityName] = useState(null);
-  const [dataDay, setDataDay] = useState(null);
+  const [latitude, setLatitude] = useState(48);
+  const [longitude, setLongitude] = useState(2.7);
+  const [cityName, setCityName] = useState<Cityname | null>(null);
+  const [dataDay, setDataDay] = useState<DataDay | null>(null);
   const [dataWeek, setDataWeek] = useState(null);
-  const [geoError, setGeoError] = useState(null);
+  const [geoError, setGeoError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -78,20 +90,20 @@ export default function WeatherApp() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={tw`flex flex-col justify-center items-center p-20`}>
       {geoError ? (
-        <Text style={styles.errorText}>{geoError}</Text>
+        <Text>{geoError}</Text>
       ) : (
         <>
-          <Text style={styles.text}>Latitude: {latitude}</Text>
-          <Text style={styles.text}>Longitude: {longitude}</Text>
+          <Text style={tw`mb-10`}>Latitude: {latitude}</Text>
+          <Text style={tw`mb-10`}>Longitude: {longitude}</Text>
           {cityName && (
-            <Text style={styles.text}>
+            <Text style={tw`mb-10`}>
               Ville: {cityName.city || cityName.town || cityName.village}
             </Text>
           )}
           {dataDay && dataDay.current && (
-            <Text style={styles.text}>
+            <Text style={tw`mb-10`}>
               Température actuelle: {dataDay.current.temperature_2m}°C
             </Text>
           )}
@@ -100,21 +112,3 @@ export default function WeatherApp() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  text: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
-    textAlign: "center",
-  },
-});
