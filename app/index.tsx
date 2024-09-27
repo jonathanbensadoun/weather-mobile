@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, Pressable, StyleSheet } from "react-native";
 
 import LottieView from "lottie-react-native";
 import * as Location from "expo-location";
 import tw from "../tw-rn";
+import * as NavigationBar from "expo-navigation-bar";
 
 interface Cityname {
   city: string;
@@ -13,6 +14,7 @@ interface Cityname {
 interface DataDay {
   current: {
     temperature_2m: number;
+    apparent_temperature: number;
   };
 }
 
@@ -23,6 +25,11 @@ export default function WeatherApp() {
   const [dataDay, setDataDay] = useState<DataDay | null>(null);
   const [dataWeek, setDataWeek] = useState(null);
   const [geoError, setGeoError] = useState("");
+
+  useEffect(() => {
+    NavigationBar.setBackgroundColorAsync("#E6D4FD");
+    NavigationBar.setBehaviorAsync("inset-swipe");
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -92,42 +99,73 @@ export default function WeatherApp() {
   };
 
   return (
-    <View
-      style={tw`flex flex-col justify-center items-center p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
+    <Pressable
+      onPress={() => {
+        // setTimeout(() => NavigationBar.setVisibilityAsync("hidden"), 20000);
+      }}
+      style={tw` p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
     >
-      <LottieView
-        source={require("../assets/images/Animation - 1727431713401.json")}
-        autoPlay
-        loop
-        style={tw`absolute top-0 left-0 right-0 bottom-0`}
-      />
-      <View style={tw`flex flex-col justify-center items-center`}>
-        {/* ../assets/images/Animation - 1727432262801.json for nitght */}
+      <View
+        style={tw` p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
+      >
         <LottieView
-          source={require("../assets/images/Animation - 1727432262801.json")}
+          source={require("../assets/images/Animation - 1727431713401.json")}
           autoPlay
           loop
-          style={{ width: 200, height: 200 }}
+          style={tw`absolute top-0 left-0 right-0 bottom-0`}
         />
-        {geoError ? (
-          <Text>{geoError}</Text>
-        ) : (
-          <View style={tw`w-100 flex flex-col justify-center items-center`}>
-            <Text style={tw`mb-10 text-white`}>Latitude: {latitude}</Text>
-            <Text style={tw`mb-10 text-white`}>Longitude: {longitude}</Text>
-            {cityName && (
-              <Text style={tw`mb-10 text-white`}>
-                Ville: {cityName.city || cityName.town || cityName.village}
+        <View style={tw`flex flex-col justify-start items-center`}>
+          {/* ../assets/images/Animation - 1727432262801.json for nitght */}
+          <LottieView
+            source={require("../assets/images/Animation - 1727432262801.json")}
+            autoPlay
+            loop
+            style={{ width: 200, height: 200 }}
+          />
+          {geoError ? (
+            <Text>{geoError}</Text>
+          ) : (
+            <View style={tw`w-100 flex flex-col justify-center items-center `}>
+              <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
+                Latitude: {latitude}
               </Text>
-            )}
-            {dataDay && dataDay.current && (
-              <Text style={tw`mb-10 text-white`}>
-                Température actuelle: {dataDay.current.temperature_2m}°C
+              <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
+                Longitude: {longitude}
               </Text>
-            )}
-          </View>
-        )}
+              {cityName && (
+                <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
+                  Ville: {cityName.city || cityName.town || cityName.village}
+                </Text>
+              )}
+              {dataDay && dataDay.current && (
+                <>
+                  <>
+                    <Text
+                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
+                    >
+                      Température actuelle: {dataDay.current.temperature_2m}°C
+                    </Text>
+                    <Text
+                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
+                    >
+                      Température ressentie:{" "}
+                      {dataDay.current.apparent_temperature}°C
+                    </Text>
+                  </>
+                </>
+              )}
+            </View>
+          )}
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  textShadow: {
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
+  },
+});
