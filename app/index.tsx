@@ -112,16 +112,12 @@ export default function WeatherApp() {
           source={require("../assets/images/Animation - 1727431713401.json")}
           autoPlay
           loop
+          resizeMode="cover"
           style={tw`absolute top-0 left-0 right-0 bottom-0`}
         />
         <View style={tw`flex flex-col justify-start items-center`}>
           {/* ../assets/images/Animation - 1727432262801.json for nitght */}
-          <LottieView
-            source={require("../assets/images/Animation - 1727432262801.json")}
-            autoPlay
-            loop
-            style={{ width: 200, height: 200 }}
-          />
+
           {geoError ? (
             <Text>{geoError}</Text>
           ) : (
@@ -132,6 +128,11 @@ export default function WeatherApp() {
               <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
                 Longitude: {longitude}
               </Text>
+              <LottieView
+                source={require("../assets/images/Animation - 1727440825375.json")}
+                autoPlay
+                style={{ width: 200, height: 200 }}
+              />
               {cityName && (
                 <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
                   Ville: {cityName.city || cityName.town || cityName.village}
