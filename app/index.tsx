@@ -129,7 +129,7 @@ export default function WeatherApp() {
                 Longitude: {longitude}
               </Text>
               <LottieView
-                source={require("../assets/images/Animation - 1727440825375.json")}
+                source={require("../assets/images/Animation - 1727432262801.json")}
                 autoPlay
                 style={{ width: 200, height: 200 }}
               />
