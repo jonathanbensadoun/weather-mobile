@@ -92,31 +92,42 @@ export default function WeatherApp() {
   };
 
   return (
-    <View style={tw`flex flex-col justify-center items-center p-20`}>
+    <View
+      style={tw`flex flex-col justify-center items-center p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
+    >
       <LottieView
-        source={require("../assets/images/Animation - 1727366943110.json")}
+        source={require("../assets/images/Animation - 1727431713401.json")}
         autoPlay
         loop
-        style={{ width: 200, height: 200 }}
+        style={tw`absolute top-0 left-0 right-0 bottom-0`}
       />
-      {geoError ? (
-        <Text>{geoError}</Text>
-      ) : (
-        <>
-          <Text style={tw`mb-10`}>Latitude: {latitude}</Text>
-          <Text style={tw`mb-10`}>Longitude: {longitude}</Text>
-          {cityName && (
-            <Text style={tw`mb-10`}>
-              Ville: {cityName.city || cityName.town || cityName.village}
-            </Text>
-          )}
-          {dataDay && dataDay.current && (
-            <Text style={tw`mb-10`}>
-              Température actuelle: {dataDay.current.temperature_2m}°C
-            </Text>
-          )}
-        </>
-      )}
+      <View style={tw`flex flex-col justify-center items-center`}>
+        {/* ../assets/images/Animation - 1727432262801.json for nitght */}
+        <LottieView
+          source={require("../assets/images/Animation - 1727432262801.json")}
+          autoPlay
+          loop
+          style={{ width: 200, height: 200 }}
+        />
+        {geoError ? (
+          <Text>{geoError}</Text>
+        ) : (
+          <View style={tw`w-100 flex flex-col justify-center items-center`}>
+            <Text style={tw`mb-10 text-white`}>Latitude: {latitude}</Text>
+            <Text style={tw`mb-10 text-white`}>Longitude: {longitude}</Text>
+            {cityName && (
+              <Text style={tw`mb-10 text-white`}>
+                Ville: {cityName.city || cityName.town || cityName.village}
+              </Text>
+            )}
+            {dataDay && dataDay.current && (
+              <Text style={tw`mb-10 text-white`}>
+                Température actuelle: {dataDay.current.temperature_2m}°C
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
     </View>
   );
 }
