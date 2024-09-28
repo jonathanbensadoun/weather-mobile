@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#E6D4FD"
     },
     "ios": {
       "infoPlist": {
@@ -22,7 +22,7 @@
       "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#E6D4FD"
+        "backgroundColor": "#ffffff"
       },
       "package": "com.bensghost19.weather"
     },

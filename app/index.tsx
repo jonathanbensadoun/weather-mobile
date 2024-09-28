@@ -90,7 +90,7 @@ export default function WeatherApp() {
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
       );
       const data = await response.json();
-      console.log("data", data);
+      // console.log("data", data);
       setCityName(data.address);
     } catch (error) {
       console.error(
