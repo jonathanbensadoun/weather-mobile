@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Text, View, Pressable, StyleSheet } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 
 import LottieView from "lottie-react-native";
 import * as Location from "expo-location";
@@ -23,8 +23,12 @@ export default function WeatherApp() {
   const [longitude, setLongitude] = useState(2.7);
   const [cityName, setCityName] = useState<Cityname | null>(null);
   const [dataDay, setDataDay] = useState<DataDay | null>(null);
-  const [dataWeek, setDataWeek] = useState(null);
   const [geoError, setGeoError] = useState("");
+  const [reload, setReload] = useState(false);
+
+  // Pour suivre l'état de l'animation
+  const [animationPaused, setAnimationPaused] = useState(false);
+  const locationAnimationRef = useRef<LottieView>(null); // Ref pour LottieView
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync("#E6D4FD");
@@ -47,26 +51,11 @@ export default function WeatherApp() {
 
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
-      fetchDataWeek();
       fetchDataDay();
       fetchDataCity();
     }
-  }, [latitude, longitude]);
-
-  const fetchDataWeek = async () => {
-    try {
-      const response = await fetch(
-        `https://api.open-meteo.com/v1/meteofrance?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration&timezone=Europe%2FLondon`
-      );
-      const data = await response.json();
-      setDataWeek(data);
-    } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des données hebdomadaires:",
-        error
-      );
-    }
-  };
+    setReload(false);
+  }, [latitude, longitude, reload]);
 
   const fetchDataDay = async () => {
     try {
@@ -98,68 +87,83 @@ export default function WeatherApp() {
     }
   };
 
+  // Fonction pour démarrer ou relancer l'animation
+  const handleAnimationPress = () => {
+    if (animationPaused) {
+      locationAnimationRef.current?.resume(); // Reprendre l'animation si elle est en pause
+    } else {
+      locationAnimationRef.current?.play(); // Jouer l'animation
+    }
+    setAnimationPaused(!animationPaused); // Inverser l'état de pause
+  };
+
   return (
-    <Pressable
-      onPress={() => {
-        // setTimeout(() => NavigationBar.setVisibilityAsync("hidden"), 20000);
-      }}
+    <View
       style={tw` p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
     >
-      <View
-        style={tw` p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
-      >
-        <LottieView
-          source={require("../assets/images/Animation - 1727431713401.json")}
-          autoPlay
-          loop
-          resizeMode="cover"
-          style={tw`absolute top-0 left-0 right-0 bottom-0`}
-        />
-        <View style={tw`flex flex-col justify-start items-center`}>
-          {/* ../assets/images/Animation - 1727432262801.json for nitght */}
+      <LottieView
+        source={require("../assets/images/Animation - 1727431713401.json")}
+        autoPlay
+        loop
+        resizeMode="cover"
+        style={tw`absolute top-0 left-0 right-0 bottom-0`}
+        speed={0.5}
+      />
 
-          {geoError ? (
-            <Text>{geoError}</Text>
-          ) : (
-            <View style={tw`w-100 flex flex-col justify-center items-center `}>
-              <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
-                Latitude: {latitude}
-              </Text>
-              <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
-                Longitude: {longitude}
-              </Text>
-              <LottieView
-                source={require("../assets/images/Animation - 1727432262801.json")}
-                autoPlay
-                style={{ width: 200, height: 200 }}
-              />
-              {cityName && (
+      <View style={tw`flex flex-col justify-start items-center`}>
+        {geoError ? (
+          <Text>{geoError}</Text>
+        ) : (
+          <View style={tw`w-100 flex flex-col justify-center items-center `}>
+            <View
+              style={tw`flex flex-row justify-center items-center  mb-10 gap-4 bg-purple-300 p-4 rounded-lg bg-opacity-20 `}
+            >
+              <TouchableOpacity onPress={handleAnimationPress}>
+                <View style={{ width: 100, height: 100 }}>
+                  <LottieView
+                    source={require("../assets/images/location.json")}
+                    autoPlay
+                    loop={false} // Ne pas boucler
+                    renderMode="AUTOMATIC"
+                    speed={0.6}
+                    ref={locationAnimationRef} // Ref pour contrôler l'animation
+                  />
+                </View>
+              </TouchableOpacity>
+              <View style={tw`flex flex-col justify-between items-center`}>
                 <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
-                  Ville: {cityName.city || cityName.town || cityName.village}
+                  Latitude: {latitude.toFixed(5)}
+                </Text>
+                <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
+                  Longitude: {longitude.toFixed(5)}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={tw`bg-purple-300 p-4 rounded-lg bg-opacity-20 flex flex-col justify-center items-center`}
+            >
+              {cityName && (
+                <Text style={[tw`mb-4 text-white text-4xl`, styles.textShadow]}>
+                  {cityName.city || cityName.town || cityName.village}
                 </Text>
               )}
               {dataDay && dataDay.current && (
-                <>
-                  <>
-                    <Text
-                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
-                    >
-                      Température actuelle: {dataDay.current.temperature_2m}°C
-                    </Text>
-                    <Text
-                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
-                    >
-                      Température ressentie:{" "}
-                      {dataDay.current.apparent_temperature}°C
-                    </Text>
-                  </>
-                </>
+                <View style={tw`flex flex-row justify-center items-center`}>
+                  <Text
+                    style={[tw`mb-4 text-white text-3xl`, styles.textShadow]}
+                  >
+                    {dataDay.current.temperature_2m}°C{" "}
+                  </Text>
+                  <Text style={[tw`mb-4 text-white `, styles.textShadow]}>
+                    {`  ( ressentie: ${dataDay.current.apparent_temperature}°C )`}
+                  </Text>
+                </View>
               )}
             </View>
-          )}
-        </View>
+          </View>
+        )}
       </View>
-    </Pressable>
+    </View>
   );
 }
 
