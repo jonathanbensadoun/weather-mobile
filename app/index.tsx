@@ -7,10 +7,22 @@ import tw from "../tw-rn";
 import * as NavigationBar from "expo-navigation-bar";
 
 interface Cityname {
-  city: string;
-  town: string;
-  village: string;
+  city?: string;
+  town?: string;
+  village?: string;
+  municipality?: string;
+  ISO3166_2_lvl4?: string;
+  ISO3166_2_lvl6?: string;
+  country?: string;
+  country_code?: string;
+  county?: string;
+
+  postcode?: string;
+  region?: string;
+  road?: string;
+  state?: string;
 }
+
 interface DataDay {
   current: {
     temperature_2m: number;
@@ -78,6 +90,7 @@ export default function WeatherApp() {
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
       );
       const data = await response.json();
+      console.log("data", data);
       setCityName(data.address);
     } catch (error) {
       console.error(
@@ -165,25 +178,26 @@ export default function WeatherApp() {
               ) : (
                 <View style={tw`flex flex-col justify-center items-center`}>
                   {cityName && (
-                    <Text
-                      style={[tw`mb-4 text-white text-4xl`, styles.textShadow]}
-                    >
-                      {cityName.city || cityName.town || cityName.village}
-                    </Text>
-                  )}
-                  {dataDay && dataDay.current && (
-                    <View style={tw`flex flex-row justify-center items-center`}>
+                    <View style={tw`flex flex-col justify-center items-center`}>
                       <Text
                         style={[
-                          tw`mb-4 text-white text-3xl`,
+                          tw`mb-4 text-white text-4xl`,
                           styles.textShadow,
                         ]}
                       >
-                        {dataDay.current.temperature_2m}°C{" "}
+                        {cityName.city || cityName.town || cityName.village}
                       </Text>
-                      <Text style={[tw`mb-4 text-white `, styles.textShadow]}>
-                        {`  ( ressentie: ${dataDay.current.apparent_temperature}°C )`}
+                      <Text style={[tw`mb-4 text-medium-purple text-xl`]}>
+                        {cityName.road}
                       </Text>
+                      <View style={tw`flex flex-row  gap-4`}>
+                        <Text style={[tw`mb-4 text-medium-purple  text-xl`]}>
+                          {cityName.postcode}
+                        </Text>
+                        <Text style={[tw`mb-4 text-medium-purple text-xl`]}>
+                          {cityName.country}
+                        </Text>
+                      </View>
                     </View>
                   )}
                 </View>
@@ -192,13 +206,25 @@ export default function WeatherApp() {
           </View>
         )}
       </View>
+      {dataDay && dataDay.current && (
+        <View
+          style={tw`flex flex-col justify-center items-center absolute bottom-0 right-0 px-4 `}
+        >
+          <Text style={[tw` text-white text-3xl`, styles.textShadow]}>
+            {dataDay.current.temperature_2m}°C{" "}
+          </Text>
+          <Text style={[tw`mb-4 text-white `, styles.textShadow]}>
+            {`  ( ressentie: ${dataDay.current.apparent_temperature}°C )`}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   textShadow: {
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowColor: "rgba(0, 0, 0, 0.55)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },

@@ -7,6 +7,9 @@ module.exports = {
         celadon: "#77d7c9",
         lavande: "#c89eff",
         celeste: "#bbdcff",
+        'black-purple' : "#361B4A",
+        'medium-purple' : "#603A7C",
+        'light-purple' : "#E6D4FD",
       },
       animation: {
         "slide-down": "slideDown 1s ease-in-out",
