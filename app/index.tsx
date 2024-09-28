@@ -53,8 +53,8 @@ export default function WeatherApp() {
     if (latitude !== null && longitude !== null) {
       fetchDataDay();
       fetchDataCity();
+      setTimeout(() => setReload(false), 4000);
     }
-    setReload(false);
   }, [latitude, longitude, reload]);
 
   const fetchDataDay = async () => {
@@ -89,6 +89,7 @@ export default function WeatherApp() {
 
   // Fonction pour démarrer ou relancer l'animation
   const handleAnimationPress = () => {
+    setReload(true);
     if (animationPaused) {
       locationAnimationRef.current?.resume(); // Reprendre l'animation si elle est en pause
     } else {
@@ -116,7 +117,7 @@ export default function WeatherApp() {
         ) : (
           <View style={tw`w-100 flex flex-col justify-center items-center `}>
             <View
-              style={tw`flex flex-row justify-center items-center  mb-10 gap-4 bg-purple-300 p-4 rounded-lg bg-opacity-20 `}
+              style={tw`flex flex-row justify-center items-center  mb-10  bg-purple-300 p-4 rounded-lg bg-opacity-20 `}
             >
               <TouchableOpacity onPress={handleAnimationPress}>
                 <View style={{ width: 100, height: 100 }}>
@@ -130,33 +131,61 @@ export default function WeatherApp() {
                   />
                 </View>
               </TouchableOpacity>
-              <View style={tw`flex flex-col justify-between items-center`}>
-                <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
-                  Latitude: {latitude.toFixed(5)}
-                </Text>
-                <Text style={[tw`mb-4 text-white text-lg`, styles.textShadow]}>
-                  Longitude: {longitude.toFixed(5)}
-                </Text>
+              <View>
+                {!reload && (
+                  <View
+                    style={tw`flex flex-col justify-between items-center ml-4`}
+                  >
+                    <Text
+                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
+                    >
+                      Latitude: {latitude.toFixed(5)}
+                    </Text>
+                    <Text
+                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
+                    >
+                      Longitude: {longitude.toFixed(5)}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
             <View
               style={tw`bg-purple-300 p-4 rounded-lg bg-opacity-20 flex flex-col justify-center items-center`}
             >
-              {cityName && (
-                <Text style={[tw`mb-4 text-white text-4xl`, styles.textShadow]}>
-                  {cityName.city || cityName.town || cityName.village}
-                </Text>
-              )}
-              {dataDay && dataDay.current && (
-                <View style={tw`flex flex-row justify-center items-center`}>
-                  <Text
-                    style={[tw`mb-4 text-white text-3xl`, styles.textShadow]}
-                  >
-                    {dataDay.current.temperature_2m}°C{" "}
-                  </Text>
-                  <Text style={[tw`mb-4 text-white `, styles.textShadow]}>
-                    {`  ( ressentie: ${dataDay.current.apparent_temperature}°C )`}
-                  </Text>
+              {reload ? (
+                <LottieView
+                  source={require("../assets/images/Animation - 1727516713625.json")}
+                  autoPlay
+                  loop
+                  resizeMode="cover"
+                  speed={1}
+                  style={tw`w-26 h-26`}
+                />
+              ) : (
+                <View style={tw`flex flex-col justify-center items-center`}>
+                  {cityName && (
+                    <Text
+                      style={[tw`mb-4 text-white text-4xl`, styles.textShadow]}
+                    >
+                      {cityName.city || cityName.town || cityName.village}
+                    </Text>
+                  )}
+                  {dataDay && dataDay.current && (
+                    <View style={tw`flex flex-row justify-center items-center`}>
+                      <Text
+                        style={[
+                          tw`mb-4 text-white text-3xl`,
+                          styles.textShadow,
+                        ]}
+                      >
+                        {dataDay.current.temperature_2m}°C{" "}
+                      </Text>
+                      <Text style={[tw`mb-4 text-white `, styles.textShadow]}>
+                        {`  ( ressentie: ${dataDay.current.apparent_temperature}°C )`}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               )}
             </View>
