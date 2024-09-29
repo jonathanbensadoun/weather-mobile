@@ -208,12 +208,12 @@ export default function WeatherApp() {
       </View>
       {dataDay && dataDay.current && (
         <View
-          style={tw`flex flex-col justify-center items-center absolute bottom-0 right-0 px-4 `}
+          style={tw`flex flex-row justify-center items-center absolute bottom-0 right-4 m-4`}
         >
           <Text style={[tw` text-white text-3xl`, styles.textShadow]}>
             {dataDay.current.temperature_2m}°C{" "}
           </Text>
-          <Text style={[tw`mb-4 text-white `, styles.textShadow]}>
+          <Text style={[tw`text-white `, styles.textShadow]}>
             {`  ( ressentie: ${dataDay.current.apparent_temperature}°C )`}
           </Text>
         </View>
