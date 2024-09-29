@@ -9,7 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-
+weather-250787-28282d1275d3.json
 # macOS
 .DS_Store
 
