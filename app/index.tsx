@@ -5,6 +5,7 @@ import LottieView from "lottie-react-native";
 import * as Location from "expo-location";
 import tw from "../tw-rn";
 import * as NavigationBar from "expo-navigation-bar";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface Cityname {
   city?: string;
@@ -132,7 +133,11 @@ export default function WeatherApp() {
             <View
               style={tw`flex flex-row justify-center items-center  mb-10  bg-purple-300 p-4 rounded-lg bg-opacity-20 `}
             >
-              <TouchableOpacity onPress={handleAnimationPress}>
+              <TouchableOpacity
+                onPress={handleAnimationPress}
+                accessible={true}
+                accessibilityLabel="Rafraîchir la localisation"
+              >
                 <View style={{ width: 100, height: 100 }}>
                   <LottieView
                     source={require("../assets/images/location.json")}
@@ -181,7 +186,7 @@ export default function WeatherApp() {
                     <View style={tw`flex flex-col justify-center items-center`}>
                       <Text
                         style={[
-                          tw`mb-4 text-white text-4xl`,
+                          tw`mb-4 text-white text-3xl`,
                           styles.textShadow,
                         ]}
                       >
@@ -208,7 +213,7 @@ export default function WeatherApp() {
       </View>
       {dataDay && dataDay.current && (
         <View
-          style={tw`flex flex-row justify-center items-center absolute bottom-0 right-4 m-4`}
+          style={tw`flex flex-row justify-center items-center absolute bottom-0 left-0 right-0 m-4`}
         >
           <Text style={[tw` text-white text-3xl`, styles.textShadow]}>
             {dataDay.current.temperature_2m}°C{" "}
