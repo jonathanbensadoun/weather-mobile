@@ -32,8 +32,8 @@ interface DataDay {
 }
 
 export default function WeatherApp() {
-  const [latitude, setLatitude] = useState(48.8566);
-  const [longitude, setLongitude] = useState(2.3522);
+  const [latitude, setLatitude] = useState<Number | null>(null);
+  const [longitude, setLongitude] = useState<Number | null>(null);
   const [cityName, setCityName] = useState<Cityname | null>(null);
   const [dataDay, setDataDay] = useState<DataDay | null>(null);
   const [geoError, setGeoError] = useState("");
@@ -150,7 +150,7 @@ export default function WeatherApp() {
                 </View>
               </TouchableOpacity>
               <View>
-                {!reload && (
+                {!reload && latitude && longitude && (
                   <View
                     style={tw`flex flex-col justify-between items-center ml-4`}
                   >
