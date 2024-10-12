@@ -38,15 +38,21 @@ export default function WeatherApp() {
   const [dataDay, setDataDay] = useState<DataDay | null>(null);
   const [geoError, setGeoError] = useState("");
   const [reload, setReload] = useState(false);
-
-  // Pour suivre l'état de l'animation
+  const [isNigth, setIsNigth] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [animationPaused, setAnimationPaused] = useState(false);
-  const locationAnimationRef = useRef<LottieView>(null); // Ref pour LottieView
+  const locationAnimationRef = useRef<LottieView>(null);
 
   useEffect(() => {
-    NavigationBar.setBackgroundColorAsync("#E6D4FD");
+    if (isNigth && !loading) {
+      NavigationBar.setBackgroundColorAsync("#19164A");
+    } else {
+      NavigationBar.setBackgroundColorAsync("#E6D4FD");
+    }
+
     NavigationBar.setBehaviorAsync("inset-swipe");
-  }, []);
+    setTimeout(() => setLoading(false), 4000);
+  }, [isNigth, loading]);
 
   useEffect(() => {
     (async () => {
@@ -73,9 +79,20 @@ export default function WeatherApp() {
   const fetchDataDay = async () => {
     try {
       const response = await fetch(
-        `https://api.open-meteo.com/v1/meteofrance?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m`
+        `https://api.open-meteo.com/v1/meteofrance?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m&daily=sunrise,sunset`
       );
       const data = await response.json();
+      const dateNow = new Date();
+
+      if (
+        dateNow > new Date(data.daily.sunset[0]) &&
+        dateNow < new Date(data.daily.sunrise[0])
+      ) {
+        setIsNigth(true);
+      } else {
+        setIsNigth(false);
+      }
+
       setDataDay(data);
     } catch (error) {
       console.error(
@@ -116,102 +133,153 @@ export default function WeatherApp() {
     <View
       style={tw` p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
     >
-      <LottieView
-        source={require("../assets/images/Animation - 1727431713401.json")}
-        autoPlay
-        loop
-        resizeMode="cover"
-        style={tw`absolute top-0 left-0 right-0 bottom-0`}
-        speed={0.5}
-      />
+      {isNigth ? (
+        <LottieView
+          source={require("../assets/images/nitgh-bg.json")}
+          autoPlay
+          loop
+          resizeMode="cover"
+          style={tw`absolute top-0 left-0 right-0 bottom-0`}
+          speed={1}
+        />
+      ) : (
+        <LottieView
+          source={require("../assets/images/Animation - 1727431713401.json")}
+          autoPlay
+          loop
+          resizeMode="cover"
+          style={tw`absolute top-0 left-0 right-0 bottom-0`}
+          speed={0.5}
+        />
+      )}
 
-      <View style={tw`flex flex-col justify-start items-center`}>
-        {geoError ? (
-          <Text>{geoError}</Text>
-        ) : (
-          <View style={tw`w-100 flex flex-col justify-center items-center `}>
-            <View
-              style={tw`flex flex-row justify-center items-center  mb-10  bg-purple-300 p-4 rounded-lg bg-opacity-20 `}
-            >
-              <TouchableOpacity
-                onPress={handleAnimationPress}
-                accessible={true}
-                accessibilityLabel="Rafraîchir la localisation"
+      {loading ? (
+        <View style={tw`flex flex-col justify-center items-center w-full `}>
+          <LottieView
+            source={require("../assets/images/Animation - 1727516713625.json")}
+            autoPlay
+            loop
+            resizeMode="cover"
+            speed={1}
+            style={tw`w-26 h-26`}
+          />
+          <Text style={tw`text-white text-2xl`}>Chargement...</Text>
+        </View>
+      ) : (
+        <View
+          style={tw`flex flex-col justify-start items-center ${
+            isNigth ? "mt-40 " : ""
+          }`}
+        >
+          {geoError ? (
+            <Text>{geoError}</Text>
+          ) : (
+            <View style={tw`w-100 flex flex-col justify-center items-center `}>
+              <View
+                style={tw`flex flex-row justify-center items-center  mb-10  bg-purple-300 p-4 rounded-lg bg-opacity-20 `}
               >
-                <View style={{ width: 100, height: 100 }}>
-                  <LottieView
-                    source={require("../assets/images/location.json")}
-                    autoPlay
-                    loop={false} // Ne pas boucler
-                    renderMode="AUTOMATIC"
-                    speed={0.6}
-                    ref={locationAnimationRef} // Ref pour contrôler l'animation
-                  />
+                <TouchableOpacity
+                  onPress={handleAnimationPress}
+                  accessible={true}
+                  accessibilityLabel="Rafraîchir la localisation"
+                >
+                  <View style={{ width: 100, height: 100 }}>
+                    <LottieView
+                      source={require("../assets/images/location.json")}
+                      autoPlay
+                      loop={false} // Ne pas boucler
+                      renderMode="AUTOMATIC"
+                      speed={0.6}
+                      ref={locationAnimationRef} // Ref pour contrôler l'animation
+                    />
+                  </View>
+                </TouchableOpacity>
+                <View>
+                  {!reload && latitude && longitude && (
+                    <View
+                      style={tw`flex flex-col justify-between items-center ml-4`}
+                    >
+                      <Text
+                        style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
+                      >
+                        Latitude: {latitude.toFixed(5)}
+                      </Text>
+                      <Text
+                        style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
+                      >
+                        Longitude: {longitude.toFixed(5)}
+                      </Text>
+                    </View>
+                  )}
                 </View>
-              </TouchableOpacity>
-              <View>
-                {!reload && latitude && longitude && (
-                  <View
-                    style={tw`flex flex-col justify-between items-center ml-4`}
-                  >
-                    <Text
-                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
-                    >
-                      Latitude: {latitude.toFixed(5)}
-                    </Text>
-                    <Text
-                      style={[tw`mb-4 text-white text-lg`, styles.textShadow]}
-                    >
-                      Longitude: {longitude.toFixed(5)}
-                    </Text>
+              </View>
+              <View
+                style={tw`bg-purple-300 p-4 rounded-lg bg-opacity-20 flex flex-col justify-center items-center ${
+                  isNigth ? "mt-8" : ""
+                }`}
+              >
+                {reload ? (
+                  <LottieView
+                    source={require("../assets/images/Animation - 1727516713625.json")}
+                    autoPlay
+                    loop
+                    resizeMode="cover"
+                    speed={1}
+                    style={tw`w-26 h-26`}
+                  />
+                ) : (
+                  <View style={tw`flex flex-col justify-center items-center`}>
+                    {cityName && (
+                      <View
+                        style={tw`flex flex-col justify-center items-center`}
+                      >
+                        <Text
+                          style={[
+                            tw`mb-4 text-white text-3xl`,
+                            styles.textShadow,
+                          ]}
+                        >
+                          {cityName.city || cityName.town || cityName.village}
+                        </Text>
+                        <Text
+                          style={[
+                            tw`mb-4 text-medium-purple text-xl ${
+                              isNigth ? "text-white" : ""
+                            }`,
+                          ]}
+                        >
+                          {cityName.road}
+                        </Text>
+                        <View style={tw`flex flex-row  gap-4`}>
+                          <Text
+                            style={[
+                              tw`mb-4 text-medium-purple  text-xl  ${
+                                isNigth ? "text-white" : ""
+                              }`,
+                            ]}
+                          >
+                            {cityName.postcode}
+                          </Text>
+                          <Text
+                            style={[
+                              tw`mb-4 text-medium-purple text-xl  ${
+                                isNigth ? "text-white" : ""
+                              }`,
+                            ]}
+                          >
+                            {cityName.country}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
             </View>
-            <View
-              style={tw`bg-purple-300 p-4 rounded-lg bg-opacity-20 flex flex-col justify-center items-center`}
-            >
-              {reload ? (
-                <LottieView
-                  source={require("../assets/images/Animation - 1727516713625.json")}
-                  autoPlay
-                  loop
-                  resizeMode="cover"
-                  speed={1}
-                  style={tw`w-26 h-26`}
-                />
-              ) : (
-                <View style={tw`flex flex-col justify-center items-center`}>
-                  {cityName && (
-                    <View style={tw`flex flex-col justify-center items-center`}>
-                      <Text
-                        style={[
-                          tw`mb-4 text-white text-3xl`,
-                          styles.textShadow,
-                        ]}
-                      >
-                        {cityName.city || cityName.town || cityName.village}
-                      </Text>
-                      <Text style={[tw`mb-4 text-medium-purple text-xl`]}>
-                        {cityName.road}
-                      </Text>
-                      <View style={tw`flex flex-row  gap-4`}>
-                        <Text style={[tw`mb-4 text-medium-purple  text-xl`]}>
-                          {cityName.postcode}
-                        </Text>
-                        <Text style={[tw`mb-4 text-medium-purple text-xl`]}>
-                          {cityName.country}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-          </View>
-        )}
-      </View>
-      {dataDay && dataDay.current && (
+          )}
+        </View>
+      )}
+      {dataDay && dataDay.current && !loading && (
         <View
           style={tw`flex flex-row justify-center items-center absolute bottom-0 left-0 right-0 m-4`}
         >
