@@ -83,12 +83,9 @@ export default function WeatherApp() {
       );
       const data = await response.json();
       const dateNow = new Date();
-      // const dateNow = new Date("2024-10-13T06:06:00Z");
       const sunrise = new Date(Date.parse(data.daily.sunrise[0]));
       const sunset = new Date(Date.parse(data.daily.sunset[0]));
-      console.log("dateNow", dateNow);
-      console.log("sunrise", sunrise);
-      console.log("sunset", sunset);
+
       if (dateNow >= sunrise && dateNow <= sunset) {
         setIsNigth(false);
       } else {
