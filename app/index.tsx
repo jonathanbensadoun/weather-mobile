@@ -79,18 +79,20 @@ export default function WeatherApp() {
   const fetchDataDay = async () => {
     try {
       const response = await fetch(
-        `https://api.open-meteo.com/v1/meteofrance?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m&daily=sunrise,sunset`
+        `https://api.open-meteo.com/v1/meteofrance?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m&daily=sunrise,sunset&timezone=Europe%2FBerlin`
       );
       const data = await response.json();
       const dateNow = new Date();
-
-      if (
-        dateNow > new Date(data.daily.sunset[0]) &&
-        dateNow < new Date(data.daily.sunrise[0])
-      ) {
-        setIsNigth(true);
-      } else {
+      // const dateNow = new Date("2024-10-13T06:06:00Z");
+      const sunrise = new Date(Date.parse(data.daily.sunrise[0]));
+      const sunset = new Date(Date.parse(data.daily.sunset[0]));
+      console.log("dateNow", dateNow);
+      console.log("sunrise", sunrise);
+      console.log("sunset", sunset);
+      if (dateNow >= sunrise && dateNow <= sunset) {
         setIsNigth(false);
+      } else {
+        setIsNigth(true);
       }
 
       setDataDay(data);
