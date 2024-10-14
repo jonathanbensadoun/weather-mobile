@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
-
+import { parseISO, isAfter, isBefore } from "date-fns";
 import LottieView from "lottie-react-native";
 import * as Location from "expo-location";
 import tw from "../tw-rn";
 import * as NavigationBar from "expo-navigation-bar";
-import { useFocusEffect } from "@react-navigation/native";
+import * as Clipboard from "expo-clipboard";
 
 interface Cityname {
   city?: string;
@@ -42,6 +42,8 @@ export default function WeatherApp() {
   const [loading, setLoading] = useState(true);
   const [animationPaused, setAnimationPaused] = useState(false);
   const locationAnimationRef = useRef<LottieView>(null);
+  const [copyAnimationPaused, setCopyAnimationPaused] = useState(false);
+  const copyAnimationRef = useRef<LottieView>(null);
 
   useEffect(() => {
     if (isNigth && !loading) {
@@ -51,7 +53,7 @@ export default function WeatherApp() {
     }
 
     NavigationBar.setBehaviorAsync("inset-swipe");
-    setTimeout(() => setLoading(false), 4000);
+    setTimeout(() => setLoading(false), 2000);
   }, [isNigth, loading]);
 
   useEffect(() => {
@@ -83,10 +85,10 @@ export default function WeatherApp() {
       );
       const data = await response.json();
       const dateNow = new Date();
-      const sunrise = new Date(Date.parse(data.daily.sunrise[0]));
-      const sunset = new Date(Date.parse(data.daily.sunset[0]));
+      const sunrise = parseISO(data.daily.sunrise[0]);
+      const sunset = parseISO(data.daily.sunset[0]);
 
-      if (dateNow >= sunrise && dateNow <= sunset) {
+      if (isAfter(dateNow, sunrise) && isBefore(dateNow, sunset)) {
         setIsNigth(false);
       } else {
         setIsNigth(true);
@@ -128,6 +130,19 @@ export default function WeatherApp() {
     setAnimationPaused(!animationPaused); // Inverser l'état de pause
   };
 
+  const handleCopyPress = () => {
+    if (copyAnimationPaused) {
+      copyAnimationRef.current?.resume();
+    } else {
+      copyAnimationRef.current?.play();
+    }
+    setCopyAnimationPaused(!copyAnimationPaused);
+    Clipboard.setStringAsync(
+      ` Je me trouve aux coordonnées suivantes: ${latitude}, ${longitude} dans la ville de ${
+        cityName?.city || cityName?.town || cityName?.village
+      }, ${cityName?.road}, ${cityName?.postcode}, ${cityName?.country}`
+    );
+  };
   return (
     <View
       style={tw` p-30 bg-purple-200  absolute top-0 left-0 right-0 bottom-0`}
@@ -153,16 +168,14 @@ export default function WeatherApp() {
       )}
 
       {loading ? (
-        <View style={tw`flex flex-col justify-center items-center w-full `}>
+        <View style={tw`flex flex-col justify-center items-center `}>
           <LottieView
             source={require("../assets/images/Animation - 1727516713625.json")}
             autoPlay
             loop
-            resizeMode="cover"
             speed={1}
-            style={tw`w-26 h-26`}
+            style={tw`w-50 h-50`}
           />
-          <Text style={tw`text-white text-2xl`}>Chargement...</Text>
         </View>
       ) : (
         <View
@@ -228,6 +241,28 @@ export default function WeatherApp() {
                   />
                 ) : (
                   <View style={tw`flex flex-col justify-center items-center`}>
+                    <View
+                      style={tw`flex flex-row justify-center items-center absolute
+                            -top-9 -right-7`}
+                    >
+                      <TouchableOpacity
+                        onPress={handleCopyPress}
+                        accessible={true}
+                        accessibilityLabel="Copier la localisation"
+                      >
+                        <View
+                          style={tw`bg-purple-300 bg-opacity-50  p-1 rounded-full`}
+                        >
+                          <LottieView
+                            source={require("../assets/images/copy.json")}
+                            loop={false}
+                            speed={1}
+                            style={tw`w-10 h-10`}
+                            ref={copyAnimationRef}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
                     {cityName && (
                       <View
                         style={tw`flex flex-col justify-center items-center`}
