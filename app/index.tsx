@@ -44,6 +44,8 @@ export default function WeatherApp() {
   const locationAnimationRef = useRef<LottieView>(null);
   const [copyAnimationPaused, setCopyAnimationPaused] = useState(false);
   const copyAnimationRef = useRef<LottieView>(null);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (isNigth && !loading) {
@@ -56,6 +58,11 @@ export default function WeatherApp() {
     setTimeout(() => setLoading(false), 2000);
   }, [isNigth, loading]);
 
+  useEffect(() => {
+    if (message) {
+      setTimeout(() => setMessage(""), 5000);
+    }
+  }, [message]);
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -106,8 +113,15 @@ export default function WeatherApp() {
   const fetchDataCity = async () => {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+        {
+          headers: {
+            Accept: "application/json", // S'assurer de récupérer du JSON
+            "User-Agent": "VotreNomApplication/1.0 (contact@example.com)",
+          },
+        }
       );
+
       const data = await response.json();
 
       setCityName(data.address);
@@ -119,15 +133,26 @@ export default function WeatherApp() {
     }
   };
 
-  // Fonction pour démarrer ou relancer l'animation
   const handleAnimationPress = () => {
+    const currentTime = new Date();
+    if (
+      lastRefreshTime &&
+      currentTime.getTime() - lastRefreshTime.getTime() < 30000
+    ) {
+      setMessage(
+        "Veuillez attendre 30 secondes avant de rafraîchir à nouveau."
+      );
+      return;
+    }
+    setMessage("");
     setReload(true);
     if (animationPaused) {
-      locationAnimationRef.current?.resume(); // Reprendre l'animation si elle est en pause
+      locationAnimationRef.current?.resume();
     } else {
-      locationAnimationRef.current?.play(); // Jouer l'animation
+      locationAnimationRef.current?.play();
     }
-    setAnimationPaused(!animationPaused); // Inverser l'état de pause
+    setAnimationPaused(!animationPaused);
+    setLastRefreshTime(currentTime);
   };
 
   const handleCopyPress = () => {
@@ -199,13 +224,14 @@ export default function WeatherApp() {
                     <LottieView
                       source={require("../assets/images/location.json")}
                       autoPlay
-                      loop={false} // Ne pas boucler
+                      loop={false}
                       renderMode="AUTOMATIC"
                       speed={0.6}
-                      ref={locationAnimationRef} // Ref pour contrôler l'animation
+                      ref={locationAnimationRef}
                     />
                   </View>
                 </TouchableOpacity>
+
                 <View>
                   {!reload && latitude && longitude && (
                     <View
@@ -304,6 +330,16 @@ export default function WeatherApp() {
                             {cityName.country}
                           </Text>
                         </View>
+                        {message && (
+                          <Text
+                            style={[
+                              tw`text-white text-lg bg-red-500 rounded-lg bg-opacity-20 mt-4 p-2`,
+                              styles.textShadow,
+                            ]}
+                          >
+                            {message}
+                          </Text>
+                        )}
                       </View>
                     )}
                   </View>
